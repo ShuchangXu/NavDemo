@@ -39,7 +39,6 @@ class OptitrackThread(threading.Thread):
                     angle = math.floor(angle_to_vec2 / math.pi * 180) - 180
                     if angle <= -180: 
                         angle += 360  # (-180,180]
-                    height = int(data_list[2] * 1000)
 
                     self.setOptitrackData(position, angle)
             except:
@@ -111,16 +110,16 @@ class OptiTrackDevice:
         print('host ip:', hostip)
         print('host port:', self.PORT)
 
-    def connect(self):
+    def connect(self, ip, port):
         self.showHostInfo()
         self.optiSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.optiSocket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 120)
-        self.optiSocket.bind(('127.0.0.1', 10010))
+        self.optiSocket.bind((ip, port))
 
 
 if __name__ == "__main__":
     otDevice = OptiTrackDevice()
-    otDevice.connect()
+    otDevice.connect('127.0.0.1', 10010)
 
     optitrackThread = OptitrackThread(otDevice.optiSocket)
 
