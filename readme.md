@@ -34,6 +34,12 @@ r0~r3是四元数的分量
 
 
 
+#### python中如下解析用户坐标数据：
+
+![image-20201022152813409](readme.assets/image-20201022152813409.png)
+
+
+
 相关信息：
 
 https://docs.python.org/zh-cn/3/library/struct.html
