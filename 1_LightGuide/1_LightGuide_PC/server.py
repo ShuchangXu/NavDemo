@@ -1,10 +1,12 @@
-import socket
-import serial
-import struct
-from quaternion import quaternion
-import multiprocessing
 import os
-from experiment import *
+import time
+import math
+import threading
+import socket
+import struct
+import serial
+from quaternion import quaternion
+from experiment import DemoTask
 
 x_axis = quaternion(0,1,0,0)
 y_axis = quaternion(0,0,1,0)
