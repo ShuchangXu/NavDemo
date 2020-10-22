@@ -10,10 +10,17 @@ x_axis = quaternion(0,1,0,0)
 y_axis = quaternion(0,0,1,0)
 z_axis = quaternion(0,0,0,1)
 
+class Optitrack:
+    def __init__(self):
+        super().__init__()
+        self.OptitrackData = [0, 0, 0]
+
+
 class OptitrackThread(threading.Thread):
-    def __init__(self, s):
+    def __init__(self, s, opti):
         super().__init__()
         self.s = s
+        self.opti = opti
 
     def setOptitrackData(self, position, angle):
         self.opti.OptitrackData[0] = math.floor(position[0]) # x mm
@@ -47,9 +54,10 @@ class OptitrackThread(threading.Thread):
 
 
 class ClientThread(threading.Thread):
-    def __init__(self, serial):
+    def __init__(self, serial, opti):
         super().__init__()
         self.serial = serial
+        self.opti = opti
 
         self.pathName = ''
         self.logUserTaskDir = ''
@@ -121,10 +129,12 @@ if __name__ == "__main__":
     otDevice = OptiTrackDevice()
     otDevice.connect('127.0.0.1', 10010)
 
-    optitrackThread = OptitrackThread(otDevice.optiSocket)
+    optiData = Optitrack()
+
+    optitrackThread = OptitrackThread(otDevice.optiSocket, optiData)
 
     lightDevice = serial.Serial("COM5", 9600)
-    clientTread = ClientThread(lightDevice)  # 创建任务，任务输出
+    clientTread = ClientThread(lightDevice, optiData)  # 创建任务，任务输出
     clientTread.start()
     time.sleep(1)  # 等待任务初始化
 
