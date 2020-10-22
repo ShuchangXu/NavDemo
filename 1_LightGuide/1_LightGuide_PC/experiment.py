@@ -2,10 +2,7 @@ import math
 import numpy as np
 import time
 import random
-import keyboard
-import winsound
 import threading
-from playsound import playsound
 from collections import deque
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import MultipleLocator
