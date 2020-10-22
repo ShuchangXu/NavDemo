@@ -80,7 +80,7 @@ class DemoTask:
 
         current_point = np.array([OptitrackData[0], OptitrackData[1]])
         currentDirection = OptitrackData[2]  # (-180,+180]
-        currentDirection = self.filter2.filter(currentDirection)  # 2.2-低通滤波用户方位
+        # currentDirection = self.filter2.filter(currentDirection)  # 2.2-低通滤波用户方位
 
         # nearest point 获取最近点
         nearest_distance = np.min(np.linalg.norm(self.path[:] - current_point, axis=1))
