@@ -78,7 +78,7 @@ class ClientThread(threading.Thread):
         self.pathName = 'demo'
         self.createTime = str(time.strftime("%Y-%m-%d %H.%M.%S", time.localtime()))
         self.logUserTaskDir = 'experiment/demoUser/'+ self.pathName  
-        self.task = DemoTask(self.pathName, self.logUserTaskDir, self.createTime, self.verbalOn)
+        self.task = DemoTask(self.pathName, self.logUserTaskDir, self.createTime)
         print("Create Task", self.pathName, "at", self.createTime)
 
     def run(self):
