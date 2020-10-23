@@ -54,7 +54,7 @@ class DemoTask:
 
         self.createTime = createTime
         self.pathName = pathName
-        self.pathFileDir = 'path/' + self.pathName + '.npy'
+        self.pathFileDir = 'path/' + self.pathName + '.txt'
         self.logFileDir = logUserTaskDir + '/' + self.pathName + ' ' + self.createTime + '.csv'
 
         self.path = None
@@ -67,7 +67,7 @@ class DemoTask:
         self.filter2 = Filter(0)  # tc_currentDirection s
 
     def calculateInitiate(self):  # 显示轨迹图时不执行
-        self.path = np.load(self.pathFileDir)
+        self.path = np.loadtxt(self.pathFileDir)
         self.logfile = open(self.logFileDir, 'w')  # 如果已经存在，则覆盖之前的
         print("Load path:", self.pathFileDir)  # 加载完成
 
