@@ -119,7 +119,9 @@ class DemoTask:
 
         targetDirection = targetDirection - 90
 
-        print("target vec (", target_vector[0], ",", target_vector[1], "), target dir = ", targetDirection)
+        mylogStr = " desVec (" 
+        mylogStr += str(target_vector[0]) + "," + str(target_vector[1])
+        mylogStr += "), desA = " + targetDirection
 
         self.filter1.filter(targetDirection, 0)  # 2.2-低通滤波物理方位
 
@@ -143,4 +145,4 @@ class DemoTask:
         self.logfile.write(log_str)
         self.logfile.flush()
 
-        return commandDirection, vibrationIntensity
+        return commandDirection, vibrationIntensity, mylogStr

@@ -93,14 +93,14 @@ class ClientThread(threading.Thread):
                 commandDirection = 180
                 vibrationIntensity = 0
 
-                commandDirection, vibrationIntensity = self.task.calculate(self.opti.OptitrackData)
+                commandDirection, vibrationIntensity, mylogStr = self.task.calculate(self.opti.OptitrackData)
                 if commandDirection == 0 and vibrationIntensity < 0:  # 任务结束
                     pass
                 
                 commandDirection += 180
                 commandDirection = int(( commandDirection + 2 ) / 4)
 
-                print("user (", self.opti.OptitrackData[0], ", ", self.opti.OptitrackData[1], "), a = ", self.opti.OptitrackData[2], "cmd = ", str(commandDirection))
+                print("user (", self.opti.OptitrackData[0], ", ", self.opti.OptitrackData[1], "), a = ", self.opti.OptitrackData[2], mylogStr, ", cmd = ", str(commandDirection))
                 self.serial.write(bytes([commandDirection]))  # 发送数据
                 self.serial.flush()
                 time.sleep(0.02)
