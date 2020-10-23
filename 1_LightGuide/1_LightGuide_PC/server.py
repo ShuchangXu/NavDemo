@@ -48,8 +48,9 @@ class OptitrackThread(threading.Thread):
                     vec2 = np.array([0, 1])
                     angle_to_vec2 = math.atan2(vec2[0], vec2[1]) - math.atan2(vec1[0], vec1[1])
                     angle = math.floor(angle_to_vec2 / math.pi * 180) - 180
-                    if angle <= -180: 
-                        angle += 360  # (-180,180]
+                    if angle <= 0: 
+                        angle += 360  # (0,360]
+                    angle = angle - 180 # (-180, 180]
 
                     self.setOptitrackData(position, angle)
             except:
