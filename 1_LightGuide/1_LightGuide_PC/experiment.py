@@ -111,11 +111,15 @@ class DemoTask:
             target_point = self.path[-1]
         target_vector = (target_point - current_point)
 
+        
+
         # target direction
         targetDirection = int(math.atan2(target_vector[1], target_vector[0]) / math.pi * 180)
         if targetDirection < -90: targetDirection += 360  # [-90,+270)
 
         targetDirection = targetDirection - 90
+
+        print("target vec (", target_vector[0], ",", target_vector[1], "), target dir = ", targetDirection)
 
         self.filter1.filter(targetDirection, 0)  # 2.2-低通滤波物理方位
 
