@@ -5,6 +5,7 @@ import threading
 import socket
 import struct
 import serial
+import numpy as np
 from quaternion import quaternion
 from experiment import DemoTask
 
@@ -19,14 +20,15 @@ class Optitrack:
 
 
 class OptitrackThread(threading.Thread):
-    def __init__(self, s, opti):
+    def __init__(self, s, opti, connect):
         super().__init__()
         self.s = s
         self.opti = opti
+        self.connect = connect
 
     def setOptitrackData(self, position, angle):
         self.opti.OptitrackData[0] = math.floor(position[0]) # x mm
-        self.opti.OptitrackData[1] = -math.floor(position[1])  # z mm
+        self.opti.OptitrackData[1] = math.floor(position[1])  # z mm
         self.opti.OptitrackData[2] = angle  # degree
         self.opti.OptitrackData[2] = self.opti.OptitrackData[2] % 360  # [0, 360)
         if self.opti.OptitrackData[2] > 180: self.opti.OptitrackData[2] -= 360  # (-180, 180]
@@ -34,11 +36,11 @@ class OptitrackThread(threading.Thread):
     def run(self):
         while True:
             try:
-                data, _ = self.s.recvfrom(120)
+                data = self.connect.recv(56)
                 if len(data) > 0:
-                    data_list = struct.unpack('>Iddddddd', data)
-                    # [id, x, y, z, r0, r1, r2, r3]
-                    position = np.array([data_list[1], data_list[3]]) * 1000
+                    data_list = struct.unpack('ddddddd', data)
+                    # [x, y, z, r0, r1, r2, r3]
+                    position = np.array([data_list[0], data_list[2]]) * 1000
                     # 位置修正？平移、旋转
                     rotation = quaternion(data_list[-1], data_list[-4], data_list[-3], data_list[-2])
                     new_vec = ((rotation * y_axis) * (rotation.conjugate())).to_list()[1:]
@@ -97,7 +99,7 @@ class ClientThread(threading.Thread):
                 commandDirection += 180
                 commandDirection = int(( commandDirection + 2 ) / 4)
 
-                print("send data " + str(commandDirection))
+                print("user (", self.opti.OptitrackData[0], ", ", self.opti.OptitrackData[1], "), a = ", self.opti.OptitrackData[2], "cmd = ", str(commandDirection))
                 self.serial.write(bytes([commandDirection]))  # 发送数据
                 self.serial.flush()
                 time.sleep(0.02)
@@ -122,20 +124,23 @@ class OptiTrackDevice:
 
     def connect(self, ip, port):
         self.showHostInfo()
-        self.optiSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.optiSocket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 120)
+        self.optiSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # self.optiSocket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 120)
         self.optiSocket.bind((ip, port))
+        self.optiSocket.listen(0)
+        connection, address = self.optiSocket.accept()
+        self.connection = connection
 
 
 if __name__ == "__main__":
     otDevice = OptiTrackDevice()
-    otDevice.connect('127.0.0.1', 10010)
+    otDevice.connect('127.0.0.1', 10091)
 
     optiData = Optitrack()
 
-    optitrackThread = OptitrackThread(otDevice.optiSocket, optiData)
+    optitrackThread = OptitrackThread(otDevice.optiSocket, optiData, otDevice.connection)
 
-    lightDevice = serial.Serial("COM5", 9600)
+    lightDevice = serial.Serial("/dev/ttyUSB0", 9600)
     clientTread = ClientThread(lightDevice, optiData)  # 创建任务，任务输出
     clientTread.start()
     time.sleep(1)  # 等待任务初始化

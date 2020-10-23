@@ -1,4 +1,5 @@
 import math
+import os
 import numpy as np
 import time
 import random
@@ -51,6 +52,12 @@ class Filter:
 class DemoTask:
     def __init__(self, pathName, logUserTaskDir, createTime):
         super().__init__()
+
+        if os.path.exists(logUserTaskDir):
+            pass
+        else:
+            os.mkdir(logUserTaskDir)
+            print("Create user task dir:", logUserTaskDir)
 
         self.createTime = createTime
         self.pathName = pathName
