@@ -113,8 +113,10 @@ class DemoTask:
 
         # target direction
         targetDirection = int(math.atan2(target_vector[1], target_vector[0]) / math.pi * 180)
-        targetDirection = 90 - targetDirection
-        if targetDirection > 180: targetDirection -= 360  # (-180,+180]
+        if targetDirection < -90: targetDirection += 360  # [-90,+270)
+
+        targetDirection = targetDirection - 90
+
         self.filter1.filter(targetDirection, 0)  # 2.2-低通滤波物理方位
 
         # command direction
