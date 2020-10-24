@@ -68,7 +68,7 @@ class DemoTask:
         self.logfile = None
 
         self.last_index = 0
-        self.ahead_distance = 40  # gd
+        self.ahead_distance = 8  # gd
 
         self.filter1 = Filter(5)  # tc_targetDirection s
         self.filter2 = Filter(0)  # tc_currentDirection s
@@ -94,7 +94,7 @@ class DemoTask:
         # 判断结束
         if abs(nearest_index - last_index) <= 3 and nearest_distance <= 300:  # 终点附近， 30㎝半径圆之内
             print("Arrive terminal!")
-            return 0, -1  # 结束
+            return 0, -1, ""  # 结束
 
         # 宽度
         safe_distance = 300  # 半路宽
@@ -121,7 +121,7 @@ class DemoTask:
 
         mylogStr = " desVec (" 
         mylogStr += str(target_vector[0]) + "," + str(target_vector[1])
-        mylogStr += "), desA = " + targetDirection
+        mylogStr += "), desA = " + str(targetDirection)
 
         self.filter1.filter(targetDirection, 0)  # 2.2-低通滤波物理方位
 
