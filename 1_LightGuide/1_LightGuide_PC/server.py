@@ -8,6 +8,7 @@ import serial
 import numpy as np
 from quaternion import quaternion
 from experiment import DemoTask
+from Octavib import octaVib
 
 x_axis = quaternion(0,1,0,0)
 y_axis = quaternion(0,0,1,0)
@@ -43,7 +44,7 @@ class OptitrackThread(threading.Thread):
                     position = np.array([data_list[0], data_list[2]]) * 1000
                     # 位置修正？平移、旋转
                     rotation = quaternion(data_list[-1], data_list[-4], data_list[-3], data_list[-2])
-                    new_vec = ((rotation * y_axis) * (rotation.conjugate())).to_list()[1:]
+                    new_vec = ((rotation * z_axis) * (rotation.conjugate())).to_list()[1:]
                     vec1 = np.array([new_vec[0], new_vec[2]])
                     vec2 = np.array([0, 1])
                     angle_to_vec2 = math.atan2(vec2[0], vec2[1]) - math.atan2(vec1[0], vec1[1])
@@ -97,13 +98,16 @@ class ClientThread(threading.Thread):
                 if commandDirection == 0 and vibrationIntensity < 0:  # 任务结束
                     pass
                 
-                commandDirection += 180
-                commandDirection = int(( commandDirection + 2 ) / 4)
-
-                print("user (", self.opti.OptitrackData[0], ", ", self.opti.OptitrackData[1], "), a = ", self.opti.OptitrackData[2], mylogStr, ", cmd = ", str(commandDirection))
-                self.serial.write(bytes([commandDirection]))  # 发送数据
-                self.serial.flush()
+                device.angle(commandDirection * 10)
                 time.sleep(0.02)
+
+                # commandDirection += 180
+                # commandDirection = int(( commandDirection + 2 ) / 4)
+
+                # print("user (", self.opti.OptitrackData[0], ", ", self.opti.OptitrackData[1], "), a = ", self.opti.OptitrackData[2], mylogStr, ", cmd = ", str(commandDirection))
+                # self.serial.write(bytes([commandDirection]))  # 发送数据
+                # self.serial.flush()
+                # time.sleep(0.02)
 
             except:
                 print("Client thread error")
@@ -134,6 +138,16 @@ class OptiTrackDevice:
 
 
 if __name__ == "__main__":
+    # backpack vibration
+    device = octaVib("/dev/ttyUSB0")
+    device.set_start(2000,15)
+    device.set_stop(2000,160)
+    device.set_angle_mapping(20,20,600,999)
+    device.set_distance_mapping(1500,20,700)
+    device.set_gamma(2.0)
+    clientTread = ClientThread(None, optiData)
+    # backpack vibration ended
+
     otDevice = OptiTrackDevice()
     otDevice.connect('127.0.0.1', 10091)
 
@@ -141,8 +155,9 @@ if __name__ == "__main__":
 
     optitrackThread = OptitrackThread(otDevice.optiSocket, optiData, otDevice.connection)
 
-    lightDevice = serial.Serial("/dev/ttyUSB0", 9600)
-    clientTread = ClientThread(lightDevice, optiData)  # 创建任务，任务输出
+    # lightDevice = serial.Serial("/dev/ttyUSB0", 9600)
+    # clientTread = ClientThread(lightDevice, optiData)  # 创建任务，任务输出
+    
     clientTread.start()
     time.sleep(1)  # 等待任务初始化
 
