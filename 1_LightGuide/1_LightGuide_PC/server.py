@@ -60,10 +60,10 @@ class OptitrackThread(threading.Thread):
 
 
 class ClientThread(threading.Thread):
-    def __init__(self, serial, opti,backpack):
+    def __init__(self, opti, serial, backpack):
         super().__init__()
-        self.serial = serial
         self.opti = opti
+        self.serial = serial
         self.backpack = backpack
 
         self.pathName = ''
@@ -99,17 +99,15 @@ class ClientThread(threading.Thread):
                 if commandDirection == 0 and vibrationIntensity < 0:  # 任务结束
                     pass
                 
+                # print("user (", self.opti.OptitrackData[0], ", ", self.opti.OptitrackData[1], "), a = ", self.opti.OptitrackData[2], mylogStr, ", cmd = ", str(commandDirection))
+
                 self.backpack.angle(commandDirection * 10)
-                print('backpack',commandDirection)
-                #time.sleep(0.02)
+                
 
                 commandDirection += 180
                 commandDirection = int(( commandDirection + 2 ) / 4)
-
-                # print("user (", self.opti.OptitrackData[0], ", ", self.opti.OptitrackData[1], "), a = ", self.opti.OptitrackData[2], mylogStr, ", cmd = ", str(commandDirection))
                 self.serial.write(bytes([commandDirection]))  # 发送数据
                 self.serial.flush()
-                print('hat',commandDirection)
                 time.sleep(0.02)
 
             except:
@@ -141,31 +139,25 @@ class OptiTrackDevice:
 
 
 if __name__ == "__main__":
-    # backpack vibration
     optiData = Optitrack()
-    device = octaVib("/dev/ttyUSB0")
-    device.set_start(2000,15)
-    device.set_stop(2000,160)
-    device.set_angle_mapping(20,20,600,999)
-    device.set_distance_mapping(1500,20,700)
-    device.set_gamma(2.0)
 
+    # backpack vibration
+    backpackDevice = octaVib("/dev/ttyUSB0")
+    backpackDevice.set_start(2000,15)
+    backpackDevice.set_stop(2000,160)
+    backpackDevice.set_angle_mapping(20,20,600,999)
+    backpackDevice.set_distance_mapping(1500,20,700)
+    backpackDevice.set_gamma(2.0)
+
+    # light Guide
     lightDevice = serial.Serial("/dev/ttyUSB1", 9600)
 
-    clientTread = ClientThread(lightDevice, optiData,device)  # 创建任务，任务输出
-    # clientTread = ClientThread(None, optiData)
-    # backpack vibration ended
+    clientTread = ClientThread(optiData, lightDevice, backpackDevice)  # 创建任务，任务输出
 
     otDevice = OptiTrackDevice()
     otDevice.connect('127.0.0.1', 10091)
-
-    
-
     optitrackThread = OptitrackThread(otDevice.optiSocket, optiData, otDevice.connection)
 
-    
-    
-    
     clientTread.start()
     time.sleep(1)  # 等待任务初始化
 
