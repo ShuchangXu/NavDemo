@@ -101,26 +101,32 @@ class ClientThread(threading.Thread):
                 if commandDirection == 0 and vibrationIntensity < 0:  # 任务结束
                     pass
                 
-                # print("user (", self.opti.OptitrackData[0], ", ", self.opti.OptitrackData[1], "), a = ", self.opti.OptitrackData[2], mylogStr, ", cmd = ", str(commandDirection))
-
                 if self.backpack != None:
                     self.backpack.angle(commandDirection * 10)
+                    print("user (", self.opti.OptitrackData[0], ", ", self.opti.OptitrackData[1], "), a = ", self.opti.OptitrackData[2], mylogStr, ", bag = ", str(commandDirection))
 
                 if self.hatSerial != None:
                     lightDir = commandDirection + 180
                     lightDir = int(( lightDir + 2 ) / 4)
                     self.hatSerial.write(bytes([lightDir]))  # 发送数据
                     self.hatSerial.flush()
+                    print("user (", self.opti.OptitrackData[0], ", ", self.opti.OptitrackData[1], "), a = ", self.opti.OptitrackData[2], mylogStr, ", light = ", str(lightDir))
                 
                 if self.handle != None:
                     # data = self.handle.clientSocket.recv(3)
                     # sendData = str(commandDirection).zfill(3) + str(vibrationIntensity).zfill(3)
                     # self.handle.clientSocket.send(sendData.encode())
-                    sendData = str(commandDirection).zfill(3) + str(vibrationIntensity).zfill(3) +'x'
+                    handleDir = commandDirection + 180 + 7  # 7-367
+                    handleDir = int(handleDir) % 360
+
+                    handleIntensity = int(vibrationIntensity)
+                    sendData = str(handleDir).zfill(3) + str(handleIntensity).zfill(3) +'x'
                     self.handle.write(sendData.encode())
                     self.handle.flush()
+                    print("user (", self.opti.OptitrackData[0], ", ", self.opti.OptitrackData[1], "), a = ", self.opti.OptitrackData[2], mylogStr, ", handle = ", str(handleDir))
 
-                time.sleep(0.02)
+
+                time.sleep(0.03)
 
             except:
                 print("Client thread error")
@@ -179,7 +185,7 @@ if __name__ == "__main__":
     clientTread = ClientThread(optiData, lightDevice, backpackDevice, handleDevice)
 
     otDevice = OptiTrackDevice()
-    otDevice.connect('127.0.0.1', 10091)
+    otDevice.connect('127.0.0.1', 10092)
     optitrackThread = OptitrackThread(otDevice.optiSocket, optiData, otDevice.connection)
 
     clientTread.start()
