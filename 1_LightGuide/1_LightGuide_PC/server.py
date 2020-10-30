@@ -9,6 +9,7 @@ import numpy as np
 from quaternion import quaternion
 from experiment import DemoTask
 from Octavib import octaVib
+from Handle import HandleDevice
 
 x_axis = quaternion(0,1,0,0)
 y_axis = quaternion(0,0,1,0)
@@ -60,11 +61,12 @@ class OptitrackThread(threading.Thread):
 
 
 class ClientThread(threading.Thread):
-    def __init__(self, opti, serial, backpack):
+    def __init__(self, opti, hatSerial, backpack, handle):
         super().__init__()
         self.opti = opti
-        self.serial = serial
+        self.hatSerial = hatSerial
         self.backpack = backpack
+        self.handle = handle
 
         self.pathName = ''
         self.logUserTaskDir = ''
@@ -101,13 +103,20 @@ class ClientThread(threading.Thread):
                 
                 # print("user (", self.opti.OptitrackData[0], ", ", self.opti.OptitrackData[1], "), a = ", self.opti.OptitrackData[2], mylogStr, ", cmd = ", str(commandDirection))
 
-                self.backpack.angle(commandDirection * 10)
-                
+                if self.backpack != None:
+                    self.backpack.angle(commandDirection * 10)
 
-                commandDirection += 180
-                commandDirection = int(( commandDirection + 2 ) / 4)
-                self.serial.write(bytes([commandDirection]))  # 发送数据
-                self.serial.flush()
+                if self.hatSerial != None:
+                    lightDir = commandDirection + 180
+                    lightDir = int(( lightDir + 2 ) / 4)
+                    self.hatSerial.write(bytes([lightDir]))  # 发送数据
+                    self.hatSerial.flush()
+                
+                if self.handle != None:
+                    data = self.handle.clientSocket.recv(3)
+                    sendData = str(commandDirection).zfill(3) + str(vibrationIntensity).zfill(3)
+                    self.handle.clientSocket.send(sendData.encode())
+
                 time.sleep(0.02)
 
             except:
@@ -141,18 +150,31 @@ class OptiTrackDevice:
 if __name__ == "__main__":
     optiData = Optitrack()
 
-    # backpack vibration
-    backpackDevice = octaVib("/dev/ttyUSB0")
-    backpackDevice.set_start(2000,15)
-    backpackDevice.set_stop(2000,160)
-    backpackDevice.set_angle_mapping(20,20,600,999)
-    backpackDevice.set_distance_mapping(1500,20,700)
-    backpackDevice.set_gamma(2.0)
+    deviceType = input("\nInput device type:")
 
-    # light Guide
-    lightDevice = serial.Serial("/dev/ttyUSB1", 9600)
+    backpackDevice = None
+    lightDevice = None
+    handleDevice = None
 
-    clientTread = ClientThread(optiData, lightDevice, backpackDevice)  # 创建任务，任务输出
+    if deviceType == "l":
+        # light Guide
+        lightDevice = serial.Serial("/dev/ttyUSB1", 9600)
+
+    if deviceType == "b":
+        # backpack vibration
+        backpackDevice = octaVib("/dev/ttyUSB0")
+        backpackDevice.set_start(2000,15)
+        backpackDevice.set_stop(2000,160)
+        backpackDevice.set_angle_mapping(20,20,600,999)
+        backpackDevice.set_distance_mapping(1500,20,700)
+        backpackDevice.set_gamma(2.0)
+
+    if deviceType == "h":
+        # handle Device
+        handleDevice = HandleDevice()
+        handleDevice.connect()
+
+    clientTread = ClientThread(optiData, lightDevice, backpackDevice, handleDevice)
 
     otDevice = OptiTrackDevice()
     otDevice.connect('127.0.0.1', 10091)
