@@ -113,9 +113,12 @@ class ClientThread(threading.Thread):
                     self.hatSerial.flush()
                 
                 if self.handle != None:
-                    data = self.handle.clientSocket.recv(3)
-                    sendData = str(commandDirection).zfill(3) + str(vibrationIntensity).zfill(3)
-                    self.handle.clientSocket.send(sendData.encode())
+                    # data = self.handle.clientSocket.recv(3)
+                    # sendData = str(commandDirection).zfill(3) + str(vibrationIntensity).zfill(3)
+                    # self.handle.clientSocket.send(sendData.encode())
+                    sendData = str(commandDirection).zfill(3) + str(vibrationIntensity).zfill(3) +'x'
+                    self.handle.write(sendData.encode())
+                    self.handle.flush()
 
                 time.sleep(0.02)
 
@@ -158,9 +161,8 @@ if __name__ == "__main__":
 
     if deviceType == "l":
         # light Guide
-        lightDevice = serial.Serial("/dev/ttyUSB1", 9600)
-
-    if deviceType == "b":
+        lightDevice = serial.Serial("/dev/ttyUSB0", 9600)
+    elif deviceType == "b":
         # backpack vibration
         backpackDevice = octaVib("/dev/ttyUSB0")
         backpackDevice.set_start(2000,15)
@@ -168,11 +170,11 @@ if __name__ == "__main__":
         backpackDevice.set_angle_mapping(20,20,600,999)
         backpackDevice.set_distance_mapping(1500,20,700)
         backpackDevice.set_gamma(2.0)
-
-    if deviceType == "h":
+    elif deviceType == "h":
         # handle Device
-        handleDevice = HandleDevice()
-        handleDevice.connect()
+        handleDevice = serial.Serial("/dev/ttyUSB0", 9600)
+        # handleDevice = HandleDevice()
+        # handleDevice.connect()
 
     clientTread = ClientThread(optiData, lightDevice, backpackDevice, handleDevice)
 
