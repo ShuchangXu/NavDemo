@@ -24,16 +24,18 @@ void setup() {
 
 void loop() {
   if (mySerial.available()) {
-    receiveData = mySerial.parseInt(); 
-    if(mySerial.read() == 'x'){
-      Serial.println(receiveData);
-      if(receiveData == 100){
-        pixels.clear();
-        pixels.show();
-      }
-      if(receiveData >=0 && receiveData < 90){
-        int id = receiveData - OFFSET;
-        lightLed(id);
+    if(mySerial.read() == 'y'){
+      receiveData = mySerial.parseInt(); 
+      if(mySerial.read() == 'x'){
+        Serial.println(receiveData);
+        if(receiveData == 100){
+          pixels.clear();
+          pixels.show();
+        }
+        if(receiveData >=0 && receiveData < 90){
+          int id = receiveData - OFFSET;
+          lightLed(id);
+        }
       }
     }
   }
