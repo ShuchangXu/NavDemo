@@ -90,7 +90,7 @@ class octaVib:
         time.sleep(0.5)
     
 if __name__ == '__main__':
-    device = octaVib("COM6")
+    device = octaVib("/dev/ttyUSB0")
     device.set_start(2000,15)
     device.set_stop(2000,160)
     device.set_angle_mapping(20,20,600,999)
