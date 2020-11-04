@@ -108,7 +108,8 @@ class ClientThread(threading.Thread):
                 if self.hatSerial != None:
                     lightDir = commandDirection + 180
                     lightDir = int(( lightDir + 2 ) / 4)
-                    self.hatSerial.write(bytes([lightDir]))  # 发送数据
+                    sendData = str(lightDir).zfill(3) +'x'
+                    self.hatSerial.write(sendData)  # 发送数据
                     self.hatSerial.flush()
                     print("user (", self.opti.OptitrackData[0], ", ", self.opti.OptitrackData[1], "), a = ", self.opti.OptitrackData[2], mylogStr, ", light = ", str(lightDir))
                 

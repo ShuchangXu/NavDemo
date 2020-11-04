@@ -1,7 +1,6 @@
 #include <Adafruit_NeoPixel.h>
 #include <SoftwareSerial.h>
 
-
 #define OFFSET 23
 #define NUMPIXELS 45
 
@@ -12,8 +11,10 @@
 SoftwareSerial mySerial(RX, TX);
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
+long int receiveData = 0;
+
 void setup() {
-//  Serial.begin(9600);
+  Serial.begin(9600);
   mySerial.begin(9600);
 
   pixels.begin();
@@ -23,15 +24,17 @@ void setup() {
 
 void loop() {
   if (mySerial.available()) {
-    unsigned int receiveData = mySerial.read();
-//    Serial.println(receiveData);
-    if(receiveData == 100){
-      pixels.clear();
-      pixels.show();
-    }
-    if(receiveData >=0 && receiveData < 90){
-      int id = receiveData - OFFSET;
-      lightLed(id);
+    receiveData = mySerial.parseInt(); 
+    if(mySerial.read() == 'x'){
+      Serial.println(receiveData);
+      if(receiveData == 100){
+        pixels.clear();
+        pixels.show();
+      }
+      if(receiveData >=0 && receiveData < 90){
+        int id = receiveData - OFFSET;
+        lightLed(id);
+      }
     }
   }
 }
