@@ -53,7 +53,11 @@ void lightLed(int id) {
     for (int i = NUMPIXELS - 1; i > (2 * NUMPIXELS - 2 - id) ; i--) {
       pixels.setPixelColor(i, pixels.Color(intensity, intensity, intensity));
     }
-  } else {
+  } else if (id == 22){
+    pixels.setPixelColor(21, pixels.Color(intensity, intensity, intensity));
+    pixels.setPixelColor(22, pixels.Color(intensity, intensity, intensity));
+    pixels.setPixelColor(23, pixels.Color(intensity, intensity, intensity));
+  } else{
     pixels.setPixelColor(id, pixels.Color(intensity, intensity, intensity));
   }
 
